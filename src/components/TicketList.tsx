@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 export default function TicketList({ tickets, tenant }: { tickets: { id: number; title: string; status: string; author: string }[], tenant: string }) {
+    
     return(
         <table>
             <thead>

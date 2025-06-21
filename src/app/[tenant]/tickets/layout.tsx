@@ -7,7 +7,7 @@ export default async function TicketsLayout({ children, params }: { children: Re
         <>
             <div style={{ margin: "0 10px" }}>
                 <section style={{ borderBottom: "1px solid gray" }}>
-                    <TenantName tenantName={tenant} />
+                    <TenantName tenant={tenant} />
                     <Nav tenant={tenant} />
                 </section>
                 <section>

@@ -1,6 +1,7 @@
 import TicketList from "@/components/TicketList";
 
 export default async function TicketsListPage({params}: { params: {tenant: string} }) {
+    const { tenant } = await params;
     const dummyTickets = [
         {
             id: 1,
@@ -22,6 +23,6 @@ export default async function TicketsListPage({params}: { params: {tenant: strin
         },
     ];
     return (
-       <TicketList tickets={dummyTickets} tenant={await params.tenant} />
+       <TicketList tickets={dummyTickets} tenant={tenant} />
     );
 }

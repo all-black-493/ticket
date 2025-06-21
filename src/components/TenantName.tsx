@@ -1,4 +1,23 @@
-export default function TenantName(props: { tenantName: string }) {
+import { getSupabaseCookiesUtilClient } from "@/supabase-utils/cookiesUtilClient";
+
+export default async function TenantName(props: { tenant: string }) {
+    let tenantName = "Unknown";
+    const supabase = await getSupabaseCookiesUtilClient();
+    const selection = await supabase
+        .from("tenants")
+        .select("name")
+        .eq("id", props.tenant)
+        .single();
+
+    const { data, error } = selection;
+    console.log({
+        tenant: props.tenant,
+        data,
+        error,
+    });
+
+    tenantName = data?.name ?? "Unknown";
+
     return (
         <header style={{ marginBottom: "10px" }}>
             <div style={{
@@ -9,7 +28,7 @@ export default function TenantName(props: { tenantName: string }) {
             }}>
                 Ticket System
                 <strong style={{ marginLeft: "1ex" }}>
-                    {props.tenantName}
+                    {tenantName}
                 </strong>
             </div>
 
