@@ -17,7 +17,12 @@ export const LoginForm = ({ isPasswordLogin, tenant, tenantName }: { isPasswordL
             data: { subscription },
         } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === "SIGNED_IN" && session?.user) {
-                router.push(urlPath("/tickets", tenant));
+                if (session.user.app_metadata.tenants?.includes(tenant)) {
+                    router.push(`/${tenant}/tickets`);
+                } else {
+                    supabase.auth.signOut();
+                    alert("Could not sign in. Tenant does not match.");
+                }
             }
         });
         return () => subscription.unsubscribe();

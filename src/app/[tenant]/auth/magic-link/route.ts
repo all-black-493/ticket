@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { getSupabaseAdminClient } from "@/supabase-utils/adminClient";
 import nodemailer from "nodemailer";
 import { buildUrl } from "@/utils/url-helpers";
+import { link } from "fs";
 
 
 export async function POST(request: NextRequest, { params }: { params: { tenant: string } }) {
@@ -28,8 +29,8 @@ export async function POST(request: NextRequest, { params }: { params: { tenant:
             email: email,
             type: "magiclink"
         });
-
-    if (adminError) {
+    const user = linkData.user;
+    if (adminError|| !user?.app_metadata?.tenants.includes(params.tenant)) {
         console.error("Error generating magic link:", adminError);
         return NextResponse.redirect(
             buildUrl("/error?type=magic-link", params.tenant, request),

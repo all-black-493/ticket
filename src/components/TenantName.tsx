@@ -10,11 +10,11 @@ export default async function TenantName(props: { tenant: string }) {
         .single();
 
     const { data, error } = selection;
-    console.log({
-        tenant: props.tenant,
-        data,
-        error,
-    });
+    // console.log({
+    //     tenant: props.tenant,
+    //     data,
+    //     error,
+    // });
 
     tenantName = data?.name ?? "Unknown";
 

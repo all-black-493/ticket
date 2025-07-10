@@ -1,30 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseReqResClient } from "./supabase-utils/reqResClient";
+import { TENANT_MAP } from './tenant-map'
+import { getHostnameAndPort } from "./utils/url-helpers";
+import { buildUrl } from "./utils/url-helpers";
 
 export default async function middleware(request: NextRequest) {
     const { supabase, response } = await getSupabaseReqResClient({ request });
     const session = await supabase.auth.getUser();
+
+    const [hostname] = getHostnameAndPort(request);
+    if (!hostname || !(hostname in TENANT_MAP)) {
+        return NextResponse.rewrite(new URL("/not-found", request.url));
+    }
+
     const requestedPath = request.nextUrl.pathname;
 
-    const [tenant, ...restOfPath] = requestedPath.substr(1).split("/");
+    const tenant = TENANT_MAP[hostname as keyof typeof TENANT_MAP];
     if (!/[a-z0-9-_]+/.test(tenant)) {
         return NextResponse.rewrite(new URL("/not-found", request.url));
     }
-    const applicationPath = "/" + restOfPath.join("/");
+    const applicationPath = requestedPath;
     const sessionUser = session.data.user;
 
     if (applicationPath.startsWith("/tickets")) {
         if (!sessionUser) {
-            return NextResponse.redirect(new URL(`/${tenant}/`, request.url));
+            return NextResponse.redirect(buildUrl('/', tenant, request));
+        } else if (!sessionUser.app_metadata?.tenants.includes(tenant)) {
+            return NextResponse.rewrite(new URL("/not-found", request.url));
         }
     } else if (applicationPath === "/") {
         if (sessionUser) {
-            return NextResponse.redirect(new URL(`/${tenant}/tickets`,
-                request.url));
+            return NextResponse.redirect(buildUrl('/tickets', tenant, request));
         }
     }
 
-    return response.value;
+    const rewrittenResponse = NextResponse.rewrite(
+        new URL(`/${tenant}${applicationPath}`, request.url),
+        {
+            request: request,
+        }
+    );
+    const cookiesToSet = response.value.cookies.getAll();
+    cookiesToSet.forEach((cookie) => {
+        rewrittenResponse.cookies.set(cookie.name, cookie.value, cookie);
+    });
+    return rewrittenResponse;
 }
 
 export const config = {
