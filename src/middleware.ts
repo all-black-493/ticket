@@ -3,19 +3,29 @@ import { getSupabaseReqResClient } from "./supabase-utils/reqResClient";
 import { TENANT_MAP } from './tenant-map'
 import { getHostnameAndPort } from "./utils/url-helpers";
 import { buildUrl } from "./utils/url-helpers";
+import { getSupabaseAdminClient } from "./supabase-utils/adminClient";
 
 export default async function middleware(request: NextRequest) {
     const { supabase, response } = await getSupabaseReqResClient({ request });
     const session = await supabase.auth.getUser();
 
     const [hostname] = getHostnameAndPort(request);
-    if (!hostname || !(hostname in TENANT_MAP)) {
-        return NextResponse.rewrite(new URL("/not-found", request.url));
+    const supabaseAdmin = getSupabaseAdminClient()
+
+    const { data: tenantData, error: tenantError } = await supabaseAdmin
+        .from("tenants")
+        .select("*")
+        .eq("domain", hostname)
+        .single()
+
+    if (tenantError) {
+        return NextResponse.rewrite(new URL("/not-found", request.url))
     }
 
     const requestedPath = request.nextUrl.pathname;
 
-    const tenant = TENANT_MAP[hostname as keyof typeof TENANT_MAP];
+    const tenant = tenantData.id;
+
     if (!/[a-z0-9-_]+/.test(tenant)) {
         return NextResponse.rewrite(new URL("/not-found", request.url));
     }
@@ -35,7 +45,7 @@ export default async function middleware(request: NextRequest) {
     }
 
     const rewrittenResponse = NextResponse.rewrite(
-        new URL(`/${tenant}${applicationPath}`, request.url),
+        new URL(`/${tenant}${applicationPath}${request.nextUrl.search}`, request.url),
         {
             request: request,
         }
@@ -50,3 +60,4 @@ export default async function middleware(request: NextRequest) {
 export const config = {
     matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
+

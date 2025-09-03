@@ -2,22 +2,38 @@ import Link from "next/link";
 import { urlPath } from "@/utils/url-helpers";
 
 interface ErrorPageProps {
-    searchParams: {
+    searchParams: Promise<{
         type?: string;
-        [key: string]: string | undefined;
-    };
-    params: {
+        email?: string;
+    }>;
+    params: Promise<{
         tenant: string;
-    };
-    
+    }>;
+
 }
 
-export default function ErrorPage({ searchParams, params }: ErrorPageProps) {
-    const { type } = searchParams;
-    const knownErrors = ["login-failed", "magic-link","missing-email","invalid-email", "missing-credentials", "invalid-magic-link", "missing-token"];
+export default async function ErrorPage({ searchParams, params }: ErrorPageProps) {
+    const { type, email } = await searchParams;
+    const { tenant } = await params
+    const knownErrors = [
+        "login-failed",
+        "magic-link",
+        "missing-email",
+        "invalid-email",
+        "missing-credentials",
+        "invalid-magic-link",
+        "missing-token",
+        "register_mail_mismatch",
+        "register_mail_exists",
+        "register_unknown",
+    ];
+
+    console.log("Search Params Type: ", type)
+    console.log("Search Params Email: ", email)
     return (
         <div style={{ textAlign: "center" }}>
             <h1>Oops!</h1>
+
             {type === "login-failed" && (
                 <strong>Login was not successful, sorry.</strong>
             )}
@@ -51,6 +67,23 @@ export default function ErrorPage({ searchParams, params }: ErrorPageProps) {
                     The token is missing. Please try again or contact support.
                 </strong>
             )}
+            {type === "register_mail_mismatch" && (
+                <strong>
+                    You are not legitimated to register an account with <u>{email}</u>
+                </strong>
+            )}
+            {type === "register_mail_exists" && (
+                <strong>
+                    There is already an account registered with &nbsp;
+                    <u>{email}</u>.
+                </strong>
+            )}
+            {type === "register_unknown" && (
+                <strong>
+                    Sorry but an unknown error occurred when trying to create
+                    an account.
+                </strong>
+            )}
             {/* Display a generic error message for unknown types */}
             {!knownErrors.includes(type ?? "") && (
                 <strong>
@@ -58,7 +91,7 @@ export default function ErrorPage({ searchParams, params }: ErrorPageProps) {
                 </strong>
             )}
             <br /><br />
-            <Link role="button" href={urlPath("/", params.tenant)}>
+            <Link role="button" href={urlPath("/", tenant)}>
                 Go back.
             </Link>
         </div>

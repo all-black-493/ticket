@@ -18,9 +18,11 @@ export default async function LoginPage({ params }: { params: { tenant: string }
 
   const { name: tenantName } = data;
 
+  const tenant = params.tenant
+
   return (
     <Suspense fallback={<div>Loading login form...</div>}>
-      <SearchParamWrapper tenant={params.tenant} tenantName={tenantName} />
+      <SearchParamWrapper tenant={tenant} tenantName={tenantName} />
     </Suspense>
   );
 }

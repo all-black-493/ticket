@@ -89,7 +89,34 @@ export const LoginForm = ({ isPasswordLogin, tenant, tenantName }: { isPasswordL
                 <button type="submit">
                     {isPasswordLogin ? "Login with Password" : "Login with Magic Link"}
                 </button>
+
+                <button type="button"
+                    onClick={() => {
+                        supabase.auth.signInWithOAuth({
+                            provider: "google",
+                            options: {
+                                redirectTo: window.location.origin + "/auth/verify-oauth",
+                                queryParams: {
+                                    access_type: "offline",
+                                    prompt: "consent",
+                                },
+                            },
+                        });
+                    }}
+                >
+                    Sign in with Google
+                </button>
+                <Link
+                    href={urlPath("/register", tenant)}
+                    style={{
+                        textAlign: "center",
+                        display: "block",
+                        marginTop: "1em",
+                    }}
+                >
+                    Create account
+                </Link>
             </article>
-        </form>
+        </form >
     );
 }
