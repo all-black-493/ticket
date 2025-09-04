@@ -95,13 +95,14 @@ export const LoginForm = ({ isPasswordLogin, tenant, tenantName }: { isPasswordL
                         supabase.auth.signInWithOAuth({
                             provider: "google",
                             options: {
-                                redirectTo: window.location.origin + "/auth/verify-oauth",
+                                redirectTo: `${window.location.origin}/auth/verify-oauth`,
                                 queryParams: {
                                     access_type: "offline",
                                     prompt: "consent",
                                 },
                             },
                         });
+
                     }}
                 >
                     Sign in with Google

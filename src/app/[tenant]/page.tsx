@@ -3,13 +3,15 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import SearchParamWrapper from "./SearchParamWrapper";
 
-export default async function LoginPage({ params }: { params: { tenant: string } }) {
+export default async function LoginPage({ params }: { params: Promise<{ tenant: string }> }) {
+  const { tenant } = await params;
+
   const supabaseAdmin = getSupabaseAdminClient();
 
   const { data, error } = await supabaseAdmin
     .from("tenants")
     .select("*")
-    .eq("id", params.tenant)
+    .eq("id", tenant)
     .single();
 
   if (error || !data) {
@@ -17,8 +19,6 @@ export default async function LoginPage({ params }: { params: { tenant: string }
   }
 
   const { name: tenantName } = data;
-
-  const tenant = params.tenant
 
   return (
     <Suspense fallback={<div>Loading login form...</div>}>

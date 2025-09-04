@@ -3,16 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
+  "dev": "next dev --turbopack",
+  "build": "next build", 
+  "start": "next start",
+  "lint": "next lint",
+  "ssl": "concurrently --kill-others 'npx next dev -p 3001' 'npx local-ssl-proxy --source 3000 --target 3001 --cert certs/dev-cert.pem --key certs/dev-key.pem'"
+},
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.0",
     "@tabler/icons-react": "^3.34.0",
     "@types/nodemailer": "^6.4.17",
+    "concurrently": "^9.2.1",
     "next": "15.3.3",
     "nodemailer": "^7.0.3",
     "react": "^19.0.0",
