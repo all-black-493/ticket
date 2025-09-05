@@ -35,7 +35,7 @@ export default async function middleware(request: NextRequest) {
     if (applicationPath.startsWith("/tickets")) {
         if (!sessionUser) {
             return NextResponse.redirect(buildUrl('/', tenant, request));
-        } else if (!sessionUser.app_metadata?.tenants.includes(tenant)) {
+        } else if (!(sessionUser.app_metadata?.tenants ?? []).includes(tenant)) {
             return NextResponse.rewrite(new URL("/not-found", request.url));
         }
     } else if (applicationPath === "/") {
