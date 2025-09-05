@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from "react";
-import classes from "@/app/tickets/details/[id]/TicketDetails.module.css";
+import classes from "@/app/[tenant]/tickets/details/[id]/TicketDetails.module.css";
 
 const comments = [
     {
